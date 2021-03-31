@@ -19,6 +19,7 @@ shinyServer(function(input, output, session) {
   # accessibility_server("accessibility")
   why_dash_server("why_dash")
   # meet_the_team_server("meet_the_team")
+  place_explorer_server("place_explorer")
 
     
   # Waiter ------------------------------------------------------------------
