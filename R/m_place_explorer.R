@@ -32,14 +32,49 @@ place_explorer_UI <- function(id) {
             )
           ),
           
-          mapdeckOutput(NS(id, "place_explorer"), height = "98vh"),
+          fluidRow(
+            column(4, 
+                   # MAP
+                   mapdeckOutput(NS(id, "place_explorer"), height = "33vh"),
+                   
+                   # SEARCH BAR
+                   mainPanel(id = NS(id, "search_bar"),
+                             # class = "panel panel-default",
+                             strong("Street number and street name, or postal code"),
+                             splitLayout(cellWidths = c("70%", "30%"),
+                                         textInput(inputId = NS(id, "address"), label = NULL),
+                                         actionButton(inputId = NS(id, "search"), label = "Search"))
+                   ),
+                   
+                   # HIGHLIGHTS
+                   mainPanel(id = NS(id, "highlights"),
+                             class = "panel panel-default",
+                             style = "padding: 5px; margin: 0px 5px; border-width: 0px; z-index: 500",
+                             h1("Highlights"),
+                   ),
+            ),
+            column(8,
+                   # THEME CHOICE
+                   mainPanel(id = NS(id, "themes"),
+                             # class = "panel panel-default",
+                             checkboxGroupInput(inputId = NS(id, "themes_checkbox"),
+                                                label = "Themes to choose",
+                                                choiceNames = c("Social", "Environment", "Economy"),
+                                                choiceValues = c("x", "y", "z"),
+                                                selected = c("x", "y", "z"),
+                                                inline = T)
+                   ),
+                   
+                   # INFO OUTPUT
+                   mainPanel(id = NS(id, "info"),
+                             class = "panel panel-default",
+                             style = "padding: 5px; margin: 0px 5px; border-width: 0px; z-index: 500",
+                             h1("Info output"),
+                   ),
+            ),
+            
+          ),
           
-          absolutePanel(id = NS(id,"search_bar"),
-                        class = "panel panel-default", 
-                        style = "padding: 5px; margin: 0px 5px; border-width: 0px; z-index: 500",
-                        draggable = FALSE, top = 70, #width = "350px", 
-                        textInput(inputId = NS(id, "address"), label = "Enter street number and street name, or postal code"),
-                        actionButton(inputId = NS(id, "search"), label = "Search"))
   )
   
 }
