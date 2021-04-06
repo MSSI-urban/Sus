@@ -109,31 +109,32 @@ place_explorer_server <- function(id) {
         token = paste0(
           "pk.eyJ1IjoiZHdhY2hzbXV0aCIsImEiOiJja2g2Y2JpbDc",
           "wMDc5MnltbWpja2xpYTZhIn0.BXdU7bsQYWcSwmmBx8DNqQ"),
-        zoom = 10.1, location = c(-73.58, 45.53), pitch = 0)
+        zoom = 9, location = c(-73.654479, 45.515161), pitch = 0)
       
     }) 
-    
+
     # PER DEFAULT ADDRESS
-    inputed_address <- "McGill University, Montreal, QC, Canada"
     address <- suppressMessages(tmaptools::geocode_OSM(
-      inputed_address,
+      "McGill University, Montreal, QC, Canada",
       return.first.only = TRUE,
       as.sf = TRUE))
     
     # RESEARCH AND UPDATED MAP
     observeEvent(input$search, {
       
-      inputed_address <- input$address
+      address <- suppressMessages(tmaptools::geocode_OSM(
+        input$address,
+        return.first.only = FALSE, 
+        as.data.frame = TRUE))
       
-      inputed_address <- glue::glue("{inputed_address}, Montreal, QC, Canada")
+      if (nrow(address) != 0) {
+      address <- address %>% 
+          st_as_sf(coords = c("lon", "lat"), crs = st_crs(CT)) %>%
+          st_filter(DA)
+      }
       
-      address <<- suppressMessages(tmaptools::geocode_OSM(
-        inputed_address,
-        return.first.only = TRUE,
-        as.sf = TRUE))
-      
-      if (is.null(address)) {
-        showNotification(glue::glue("No address found for {inputed_address}"),type = "error")
+      if (nrow(address) == 0) {
+        showNotification(glue::glue("No address found for this query"), type = "error")
       } else {
         mapdeck_update(map_id = NS(id, "place_explorer")) %>%
           add_scatterplot(data = address,
@@ -141,6 +142,9 @@ place_explorer_server <- function(id) {
                           lon = "lon",
                           radius = 10)
       }
+      
+      address <<- address
+      
     })
     
     # DEPENDING ON GEO, BOROUGH, CT, OR DA ID
@@ -191,8 +195,9 @@ place_explorer_server <- function(id) {
     
     # VARIABLES TO DISPLAY
     output$boxes <- renderText({
-      geo_dt %>%
-        select(starts_with(input$themes_checkbox)) %>% 
+      if (is.null(input$themes_checkbox)) "No box is ticked"
+      else geo_dt %>%
+        select(starts_with(input$themes_checkbox), -ends_with("_q3")) %>% 
         colnames()
     })
     
