@@ -42,7 +42,7 @@ place_explorer_UI <- function(id) {
           fluidRow(
             column(4, 
                    # MAP
-                   mapdeckOutput(NS(id, "place_explorer"), height = "33vh"),
+                   mapdeckOutput(NS(id, "placeex"), height = "33vh"),
                    
                    # SEARCH BAR
                    mainPanel(id = NS(id, "search_bar"),
@@ -58,6 +58,7 @@ place_explorer_UI <- function(id) {
                              class = "panel panel-default",
                              style = "padding: 5px; margin: 0px 5px; border-width: 0px; z-index: 500",
                              h1("Highlights"),
+                             htmlOutput(outputId = NS(id, "highest_p"))
                    ),
             ),
             column(8,
@@ -66,13 +67,13 @@ place_explorer_UI <- function(id) {
                              # class = "panel panel-default",
                              checkboxGroupInput(inputId = NS(id, "themes_checkbox"),
                                                 label = "Themes to choose",
-                                                choiceNames = c("Housing", "Income", "Immigration", "Transport", "CanALE"),
+                                                choiceNames = c("Housing", "Income", "Immigration", "Transport", "CanALE", "Climate"),
                                                 choiceValues = (colnames(borough) %>% 
                                                                   stringr::str_remove_all(pattern = "_.*") %>% 
-                                                                  unique())[5:9],
+                                                                  unique())[5:10],
                                                 selected = (colnames(borough) %>% 
                                                               stringr::str_remove_all(pattern = "_.*") %>% 
-                                                              unique())[5:9],
+                                                              unique())[5:10],
                                                 inline = T),
                              sliderTextInput(inputId = NS(id, "geo_scale"),
                                              label = "Geography scale",
@@ -103,91 +104,153 @@ place_explorer_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     
     # MAP INITIAL OUTPUT    
-    output$place_explorer <- renderMapdeck({
+    output$placeex <- renderMapdeck({
       mapdeck(
         style = "mapbox://styles/dwachsmuth/ckh6cg4wg05nw19p5yrs9tib7",
         token = paste0(
           "pk.eyJ1IjoiZHdhY2hzbXV0aCIsImEiOiJja2g2Y2JpbDc",
           "wMDc5MnltbWpja2xpYTZhIn0.BXdU7bsQYWcSwmmBx8DNqQ"),
-        zoom = 9, location = c(-73.654479, 45.515161), pitch = 0)
+        zoom = 9, location = c(-73.654479, 45.515161), pitch = 0) %>% 
+        add_polygon(data = borough, fill_colour = NULL, stroke_opacity = 1,
+                    fill_opacity = 1,
+                    update_view = FALSE, id = "ID")
       
     }) 
 
     # PER DEFAULT ADDRESS
-    address <- suppressMessages(tmaptools::geocode_OSM(
+    selected_point <- reactive({suppressMessages(tmaptools::geocode_OSM(
       "McGill University, Montreal, QC, Canada",
       return.first.only = TRUE,
-      as.sf = TRUE))
+      as.sf = TRUE))})
     
-    # RESEARCH AND UPDATED MAP
+    # 1. UPDATE MAP ON ADDRESS SEARCH
     observeEvent(input$search, {
       
-      address <- suppressMessages(tmaptools::geocode_OSM(
+      selected_point <- suppressMessages(tmaptools::geocode_OSM(
         input$address,
         return.first.only = FALSE, 
         as.data.frame = TRUE))
       
-      if (nrow(address) != 0) {
-      address <- address %>% 
+      if (nrow(selected_point) != 0) {
+      selected_point <- selected_point %>% 
           st_as_sf(coords = c("lon", "lat"), crs = st_crs(CT)) %>%
           st_filter(DA)
       }
       
-      if (nrow(address) == 0) {
+      if (nrow(selected_point) == 0) {
         showNotification(glue::glue("No address found for this query"), type = "error")
       } else {
-        mapdeck_update(map_id = NS(id, "place_explorer")) %>%
-          add_scatterplot(data = address,
+        mapdeck_update(map_id = NS(id, "placeex")) %>%
+          add_scatterplot(data = selected_point,
                           lat = "lat",
                           lon = "lon",
-                          radius = 10)
+                          fill_colour = "#6C83B5",
+                          radius_min_pixels = 5,
+                          radius_max_pixels = 20)
       }
       
-      address <<- address
+      selected_point <<- reactive({selected_point})
       
+    })
+    
+    # 2. UPDATE MAP ON A CLICK ON THE}) MAP
+    observeEvent(input$placeex_polygon_click,{
+      js <- input$placeex_polygon_click
+      lst <- jsonlite::fromJSON(js)
+      
+      selected_point <- data.frame(lat = lst$lat, lon = lst$lon) %>%
+        st_as_sf(coords = c("lon", "lat"), crs = st_crs(CT))
+      
+      mapdeck_update(map_id = NS(id, "placeex")) %>%
+        add_scatterplot(data = selected_point,
+                        lat = "lat",
+                        lon = "lon",
+                        fill_colour = "#6C83B5",
+                        radius_min_pixels = 5,
+                        radius_max_pixels = 20,
+                        update_view = FALSE)
+      
+      selected_point <<- reactive({selected_point})
     })
     
     # DEPENDING ON GEO, BOROUGH, CT, OR DA ID
-    
-    observe({
+    geo_ID <- 
+    reactive({
       if (input$geo_scale == "Borough") {
-        geo_ID <<- 
           borough %>%
-          st_filter(address) %>%
+          st_filter(selected_point()) %>%
           pull(ID)
-        geo_dt <<- borough
       } else if (input$geo_scale == "Census Tract") {
-        geo_ID <<- 
           CT %>%
-          st_filter(address) %>%
+          st_filter(selected_point()) %>%
           pull(ID)
-        geo_dt <<- CT
       } else if (input$geo_scale == "Dissemination Area") {
-        geo_ID <<- 
           DA %>%
-          st_filter(address) %>%
+          st_filter(selected_point()) %>%
           pull(ID)
-        geo_dt <<- DA
       }
     })
     
-    # Just to observe the reactions of geo_scale and the previous observeEvent
-    # observe({
-    #   if(exists("geo_ID")){
-    #     showNotification(glue::glue("{input$geo_scale}, {geo_ID}"),type = "warning")
-    #   }
-    # })
+    geo_dt <- 
+      reactive({
+        if (input$geo_scale == "Borough") borough
+        else if (input$geo_scale == "Census Tract") CT
+        else if (input$geo_scale == "Dissemination Area") DA
+      })
+    
+    
+    # SHOW THE 3 HIGHLIGHTS
+    observe({
+    output$highest_p <- renderUI({
+      
+      min_max <-
+        geo_dt() %>%
+        st_drop_geometry() %>%
+        select(ID, population:heat_wave_ind, -ends_with("_q3")) %>%
+        mutate(across(everything(), percent_rank, .names = "{.col}_perc")) %>%
+        filter(ID == geo_ID()) %>%
+        select(ends_with("_perc"), -ID_perc) %>%
+        tidyr::pivot_longer(cols = everything()) %>%
+        filter(value %in% c(max(value, na.rm = T), min(value, na.rm = T))) %>% 
+        mutate(value = round(value*100, digits = 2))
+
+      highlight_values <-
+        geo_dt() %>%
+        st_drop_geometry() %>%
+        filter(ID == geo_ID()) %>%
+        select(stringr::str_remove(min_max$name, "_perc"))
+      
+      highlight_ouputs <- list()
+
+      for(i in 1:nrow(min_max)){
+        percent_if_proportion <- 
+          if (stringr::str_detect(names(highlight_values[,i]), "_prop")) scales::percent(pull(highlight_values[1,i]), accuracy =0.1)
+          else round(highlight_values[1,i], digits = 2)
+        
+        highlight_ouputs[i] <- 
+         glue::glue("The {stringr::str_to_lower(input$geo_scale)} selected is at the {min_max[i,2]} ",
+                          "percentile in the {names(highlight_values)[i]} value ",
+                          "at {percent_if_proportion}.")
+      }
+      
+      HTML(paste0(highlight_ouputs, sep = "<br/>"))
+      
+    })
+    })
+    
+
     
     # TELL THE USER WHAT IS THE ADDRESS CHOSEN AND SCALE
     toListen <- reactive({
-      list(input$search,input$geo_scale)
+      list(input$search,input$geo_scale, geo_ID(), selected_point())
     })
     observeEvent(toListen(), {
     output$info_address_scale <- renderUI({
       HTML(
         paste(
-          glue::glue("Location: {address$query}"),
+          glue::glue("Location: {selected_point()$query}"),
           glue::glue("Scale: {input$geo_scale}"),
+          glue::glue("Geo ID: {geo_ID()}"),
           sep = "<br/>"
         ))
     })
@@ -195,9 +258,10 @@ place_explorer_server <- function(id) {
     
     # VARIABLES TO DISPLAY
     output$boxes <- renderText({
-      if (is.null(input$themes_checkbox)) "No box is ticked"
-      else geo_dt %>%
-        select(starts_with(input$themes_checkbox), -ends_with("_q3")) %>% 
+      # if (is.null(input$themes_checkbox)) "No box is ticked"
+      #else 
+      geo_dt() %>%
+        select(population, households, starts_with(input$themes_checkbox), -ends_with("_q3")) %>% 
         colnames()
     })
     
