@@ -1,21 +1,8 @@
 ### PLACE EXPORER ##############################################################
 
-### Online Sources ###
-
-## tmaptools and geocode_osm
-# https://www.rdocumentation.org/packages/tmap/versions/1.6-1/topics/geocode_OSM 
-# https://rdrr.io/cran/tmaptools/man/geocode_OSM.html
-
-## mapdeck tricks
-# https://symbolixau.github.io/mapdeck/articles/tips_tricks.html 
-
-
-# To get an idea of the columns present in the tables
-# colnames(borough) %>%
-#   str_remove_all(pattern = "_.*") %>%
-#   unique()
-
-
+# FUTUR GLOBAL
+pc_regex <- c("(\\w\\d\\w\\d\\w\\d)|(\\w\\d\\w\\s\\d\\w\\d)")
+postal_codes <- qread("data/postal_codes.qs")
 
 # UI ----------------------------------------------------------------------
 place_explorer_UI <- function(id) {
@@ -126,16 +113,28 @@ place_explorer_server <- function(id) {
     # 1. UPDATE MAP ON ADDRESS SEARCH
     observeEvent(input$search, {
       
-      selected_point <- suppressMessages(tmaptools::geocode_OSM(
-        input$address,
-        return.first.only = FALSE, 
-        as.data.frame = TRUE))
-      
-      if (nrow(selected_point) != 0) {
-      selected_point <- selected_point %>% 
-          st_as_sf(coords = c("lon", "lat"), crs = st_crs(CT)) %>%
-          st_filter(DA)
+      if (stringr::str_detect(input$address, pc_regex)) {
+        
+        selected_point <- stringr::str_to_lower(input$address) %>% 
+          stringr::str_remove_all(pattern = " ")
+        
+        selected_point <- postal_codes %>% 
+            filter(postal_code == selected_point) %>% 
+          st_transform(crs = st_crs(CT))
+          
+      } else {
+        selected_point <- suppressMessages(tmaptools::geocode_OSM(
+          input$address,
+          return.first.only = FALSE, 
+          as.data.frame = TRUE))
+        
+        if (nrow(selected_point) != 0) {
+          selected_point <- selected_point %>% 
+            st_as_sf(coords = c("lon", "lat"), crs = st_crs(CT)) %>%
+            st_filter(DA)
+        }
       }
+      
       
       if (nrow(selected_point) == 0) {
         showNotification(glue::glue("No address found for this query"), type = "error")
