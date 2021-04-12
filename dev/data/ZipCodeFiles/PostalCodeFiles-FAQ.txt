@@ -1,0 +1,36 @@
+		Free Postal Codes files for the US and Canada provided by Service Objects, Inc.
+	
+		Common FAQs about the Postal Code Files
+		
+		
+		
+
+1. There are multiple city and county combinations for some postal codes. Why is that?
+
+	Some postal codes extend into multiple cities and counties. There are multiple records in the file to indicate this. 
+	This is more common for US ZIP codes than it is for Canadian postal codes but there are some Canadian postal codes that can include multiple municipalities.
+
+
+2. What coordinates are provided for each postal code?
+
+	Most of the time, the provided coordinates will be the rough center of the given Postal or ZIP code.  
+	For Postal codes in the Canada file that cover a smaller geographical area (i.e. a single building or a small city block), the coordinates may be on the street in front of the area the Postal Code covers.
+
+
+3. In what format is the time zone field provided?
+
+	The time zone value is the number of hours from GMT (Greenwich Mean Time)
+
+
+4. Why are there so many more Canadian postal codes than US ZIP codes?
+
+	In general, Canadian postal codes cover much smaller geographic areas than US ZIP codes. Some Canadian postal codes can cover just a single block or even just a single high rise building.
+	Others in more rural areas can cover much larger geographic areas akin to US ZIP codes
+
+5. Some US ZIP codes have the same lat/long as other ZIP codes in the same city or don't have a Lat/Long at all. Why is that?
+
+	Unique Lat/long values aren't available for every ZIP code. Some ZIP codes are new and don't have data readily available. 
+	Other ZIP codes are solely used by the USPS for PO Box service so they won't have a typical lat long associated with them.
+	When this occurs, the data will simply report the centroid of the given city associated with the ZIP code. If no data is available, the lat/longs will be blank for those records.
+	
+	
