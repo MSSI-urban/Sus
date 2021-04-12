@@ -75,7 +75,8 @@ place_explorer_UI <- function(id) {
                              style = "padding: 5px; margin: 0px 5px; border-width: 0px; z-index: 500",
                              h1("Info output"),
                              htmlOutput(outputId = NS(id, "info_address_scale")),
-                             textOutput(outputId = NS(id, "boxes")))
+                             plotOutput(NS(id, "output_plot"), height = 350, hover = hoverOpts(NS(id, "plot_hover"))),
+                             verbatimTextOutput(NS(id, "hover_info")))
             )
             
           )
@@ -232,7 +233,7 @@ place_explorer_server <- function(id) {
                           "at {percent_if_proportion}.")
       }
       
-      HTML(paste0(highlight_ouputs, sep = "<br/>"))
+      HTML(paste0(highlight_ouputs, sep = "<br/><br/>"))
       
     })
     })
@@ -255,13 +256,62 @@ place_explorer_server <- function(id) {
     })
     })
     
-    # VARIABLES TO DISPLAY
-    output$boxes <- renderText({
-      # if (is.null(input$themes_checkbox)) "No box is ticked"
-      #else 
-      geo_dt() %>%
-        select(population, households, starts_with(input$themes_checkbox), -ends_with("_q3")) %>% 
-        colnames()
+    # PLOT WITH HOVER
+    output$output_plot <- renderPlot({
+      
+      percentiles <<- 
+        # borough %>% 
+        geo_dt() %>% 
+        st_drop_geometry() %>%
+        select(ID, population, households, starts_with(input$themes_checkbox), -ends_with("_q3")) %>%
+        # select(ID, everything(), -ends_with("_q3")) %>% 
+        mutate(across(everything(), percent_rank, .names = "{.col}_perc")) %>%
+        filter(ID == geo_ID()) %>%
+        # filter(ID == "2466072") %>% 
+        select(ends_with("_perc"), -ID_perc) %>%
+        tidyr::pivot_longer(cols = everything()) %>%
+        mutate(value = round(value*100, digits = 2)) %>% 
+        mutate(category = stringr::str_remove_all(name, pattern = "_.*")) %>% 
+        rowwise() %>% 
+        mutate(RANDOM_NUMBER = sample(1:100, 1)) %>% 
+        ungroup()
+      
+      percentiles %>% 
+      ggplot()+ 
+        geom_point(aes(x= RANDOM_NUMBER, y = value , color = category), size = 5)+
+        theme_minimal()+
+        ylab(glue::glue("Value percentile for the {stringr::str_to_lower(input$geo_scale)}"))
+      
+    })
+    
+    output$hover_info <- renderPrint({
+      
+      borough %>% 
+        select(stringr::str_remove(percentiles$name, "_perc"))
+      
+      
+      if(!is.null(input$plot_hover)){
+        hover = input$plot_hover
+        dist = sqrt((hover$x-percentiles$RANDOM_NUMBER)^2 + (hover$y-percentiles$value)^2)
+        cat("Info on a particular point:\n")
+        if(min(dist) < 3) {
+          hovered_point <- percentiles$name[which.min(dist)]
+          
+          value <-
+            geo_dt() %>%
+            st_drop_geometry() %>% 
+            select(ID, stringr::str_remove(hovered_point, "_perc")) %>%
+            filter(ID == geo_ID()) %>% select(-ID)
+          
+          value <- 
+            if (stringr::str_detect(names(value), "_prop")) scales::percent(pull(value), accuracy =0.1)
+          else round(value, digits = 2)
+          
+          glue::glue("The {stringr::str_to_lower(input$geo_scale)} selected is at the ", 
+                     "{percentiles$value[which.min(dist)]} percentile regarding \n",
+                     "{stringr::str_remove(hovered_point, '_perc')}, with a value of {value}")
+        }
+      }
     })
     
   })
