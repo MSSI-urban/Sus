@@ -9,7 +9,7 @@ CMA <-
   select(GeoUID)
 
 postal_code_raw <- 
-  read_csv("dev/data/ZipCodeFiles/CanadianPostalCodes202103.csv")
+  readr::read_csv("dev/data/ZipCodeFiles/CanadianPostalCodes202103.csv")
 
 postal_codes <- 
   postal_code_raw %>% 
@@ -21,6 +21,11 @@ postal_codes <-
   st_transform(32618) %>% 
   as_tibble() %>% 
   st_as_sf()
+
+postal_codes <- 
+postal_codes %>% 
+  mutate(postal_code = stringr::str_to_lower(postal_code),
+         postal_code = stringr::str_remove_all(postal_code, " "))
 
 # save output in qs
 
