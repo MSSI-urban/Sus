@@ -1,9 +1,36 @@
 ### PLACE EXPORER ##############################################################
 
+
+#' The place explorer, as for now, has 4 parts. 
+
+#' 1. The map. Regarding the map, the user can enter an address. OSM will retrieve
+#' all addresses corresponding to what the user enter, and we add an operation
+#' where we filter only the addresses that are in Montreal's CMA. If there are multiple results,
+#' multiple points are going to appear on the map. The user can then select the the location wanted.
+#' The user can also search by postal codes. The regex used to detect if a postal code is entered is
+#' in the R/global_place_explorer.R file, and the centroid of the postal code becomes the selected
+#' location. The user can also simply click a location on the map. 
+
+#' 2. The second part is the highlights. Whatever the themes choose, the highlights does not change.
+#' It lets the user see what are the most extreme 4 variables for this location, when compared
+#' to all the other polygons in the CMA.
+
+#' 3. Third part is to select the themes that the user is interested in, and the geography scale.
+#' At the moment, the three are either Borough, Census tract, or Dessimination Area.
+
+#' 4. Fourth part is how the data are displayed. I think it should be one plot, on which all
+#' the variables from all the selected themes are regrouped. The user can hover or click
+#' on the variable he's interested in, and a tooltip appears with information regarding
+#' the geography and the value of the variable, as well as a plot design for this kind
+#' of value. If it's a proportion it can be represented in a way, if it's $ in another, etc.
+
 # UI ----------------------------------------------------------------------
 place_explorer_UI <- function(id) {
   tabItem(tabName = "place_explorer",
           
+          # This CSS style is only used for when one address does not have entry in OSM. Then
+          # a red popup will appear in the middle of the page, stating there's no 
+          # result for the query.
           tags$head(
             tags$style(
               HTML(".shiny-notification {
@@ -29,8 +56,8 @@ place_explorer_UI <- function(id) {
                    
                    # SEARCH BAR
                    mainPanel(id = NS(id, "search_bar"),
-                             # class = "panel panel-default",
                              strong("Street number and street name, or postal code"),
+                             # put the address bar next to the search button. Splitting the space 70/30.
                              splitLayout(cellWidths = c("70%", "30%"),
                                          textInput(inputId = NS(id, "address"), label = NULL),
                                          actionButton(inputId = NS(id, "search"), label = "Search")),
@@ -47,10 +74,11 @@ place_explorer_UI <- function(id) {
             column(8,
                    # THEME AND GEOGRAPHY SCALE CHOICES
                    mainPanel(id = NS(id, "themes_and_geo"),
-                             # class = "panel panel-default",
                              checkboxGroupInput(inputId = NS(id, "themes_checkbox"),
                                                 label = "Themes to choose",
                                                 choiceNames = c("Housing", "Income", "Immigration", "Transport", "CanALE", "Climate"),
+                                                # retrieve the categories available right now in our dfs. This will have to get updated
+                                                # manually whenever new categories emmerged.
                                                 choiceValues = (colnames(borough) %>% 
                                                                   stringr::str_remove_all(pattern = "_.*") %>% 
                                                                   unique())[5:10],
@@ -87,7 +115,7 @@ place_explorer_UI <- function(id) {
 place_explorer_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     
-    # MAP INITIAL OUTPUT    
+    # MAP INITIAL OUTPUT
     output$placeex <- renderMapdeck({
       mapdeck(
         style = "mapbox://styles/dwachsmuth/ckh6cg4wg05nw19p5yrs9tib7",
@@ -100,52 +128,50 @@ place_explorer_server <- function(id) {
                     update_view = FALSE, id = "ID")
       
     }) 
-
-    # PER DEFAULT ADDRESS
-    selected_point <- reactive({suppressMessages(tmaptools::geocode_OSM(
-      "McGill University, Montreal, QC, Canada",
-      return.first.only = TRUE,
-      as.sf = TRUE))})
     
     # 1. UPDATE MAP ON ADDRESS SEARCH
     observeEvent(input$search, {
       
+      # If a postal code is entered, with the regex in the global.
       if (stringr::str_detect(input$address, pc_regex)) {
         
-        selected_point <- stringr::str_to_lower(input$address) %>% 
+        address_searched <- stringr::str_to_lower(input$address) %>% 
           stringr::str_remove_all(pattern = " ")
         
-        selected_point <- postal_codes %>% 
-            filter(postal_code == selected_point) %>% 
+        address_searched <- postal_codes %>% 
+            filter(postal_code == address_searched) %>% 
           st_transform(crs = st_crs(CT))
           
-      } else {
-        selected_point <- suppressMessages(tmaptools::geocode_OSM(
+      } else { # If it's not a postal code, then must be an address to retrieve from OSM.
+        address_searched <- suppressMessages(tmaptools::geocode_OSM(
           input$address,
           return.first.only = FALSE, 
           as.data.frame = TRUE))
         
-        if (nrow(selected_point) != 0) {
-          selected_point <- selected_point %>% 
+        if (nrow(address_searched) != 0) {
+          address_searched <- address_searched %>% 
             st_as_sf(coords = c("lon", "lat"), crs = st_crs(CT)) %>%
-            st_filter(DA)
+            # This last st_filter is to filter in only the points inside the Montreal's CMA.
+            # Because the OSM finds all these address worlwide.
+            st_filter(CT)
         }
       }
       
       
-      if (nrow(selected_point) == 0) {
+      if (nrow(address_searched) == 0) {
+        # If there's no result found, send an error popup.
         showNotification(glue::glue("No address found for this query"), type = "error")
       } else {
         mapdeck_update(map_id = NS(id, "placeex")) %>%
-          add_scatterplot(data = selected_point,
+          add_scatterplot(data = address_searched,
                           lat = "lat",
                           lon = "lon",
                           fill_colour = "#6C83B5",
                           radius_min_pixels = 5,
                           radius_max_pixels = 20)
+        
+        rv_placeex$selected_point <- address_searched
       }
-      
-      selected_point <<- reactive({selected_point})
       
     })
     
@@ -154,11 +180,11 @@ place_explorer_server <- function(id) {
       js <- input$placeex_polygon_click
       lst <- jsonlite::fromJSON(js)
       
-      selected_point <- data.frame(lat = lst$lat, lon = lst$lon) %>%
+      clicked_location <- data.frame(lat = lst$lat, lon = lst$lon) %>%
         st_as_sf(coords = c("lon", "lat"), crs = st_crs(CT))
       
       mapdeck_update(map_id = NS(id, "placeex")) %>%
-        add_scatterplot(data = selected_point,
+        add_scatterplot(data = clicked_location,
                         lat = "lat",
                         lon = "lon",
                         fill_colour = "#6C83B5",
@@ -166,7 +192,7 @@ place_explorer_server <- function(id) {
                         radius_max_pixels = 20,
                         update_view = FALSE)
       
-      selected_point <<- reactive({selected_point})
+      rv_placeex$selected_point <<- clicked_location
     })
     
     # DEPENDING ON GEO, BOROUGH, CT, OR DA ID
@@ -174,15 +200,15 @@ place_explorer_server <- function(id) {
     reactive({
       if (input$geo_scale == "Borough") {
           borough %>%
-          st_filter(selected_point()) %>%
+          st_filter(rv_placeex$selected_point) %>%
           pull(ID)
       } else if (input$geo_scale == "Census Tract") {
           CT %>%
-          st_filter(selected_point()) %>%
+          st_filter(rv_placeex$selected_point) %>%
           pull(ID)
       } else if (input$geo_scale == "Dissemination Area") {
           DA %>%
-          st_filter(selected_point()) %>%
+          st_filter(rv_placeex$selected_point) %>%
           pull(ID)
       }
     })
@@ -195,7 +221,7 @@ place_explorer_server <- function(id) {
       })
     
     
-    # SHOW THE 3 HIGHLIGHTS
+    # SHOW THE 4 HIGHLIGHTS
     observe({
     output$highest_p <- renderUI({
       
@@ -239,23 +265,6 @@ place_explorer_server <- function(id) {
     })
     
 
-    
-    # TELL THE USER WHAT IS THE ADDRESS CHOSEN AND SCALE
-    toListen <- reactive({
-      list(input$search,input$geo_scale, geo_ID(), selected_point())
-    })
-    observeEvent(toListen(), {
-    output$info_address_scale <- renderUI({
-      HTML(
-        paste(
-          glue::glue("Location: {selected_point()$query}"),
-          glue::glue("Scale: {input$geo_scale}"),
-          glue::glue("Geo ID: {geo_ID()}"),
-          sep = "<br/>"
-        ))
-    })
-    })
-    
     # PLOT WITH HOVER
     output$output_plot <- renderPlot({
       
