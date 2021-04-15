@@ -1,9 +1,5 @@
 ### PLACE EXPORER ##############################################################
 
-# FUTUR GLOBAL
-pc_regex <- c("(\\w\\d\\w\\d\\w\\d)|(\\w\\d\\w\\s\\d\\w\\d)")
-postal_codes <- qread("data/postal_codes.qs")
-
 # UI ----------------------------------------------------------------------
 place_explorer_UI <- function(id) {
   tabItem(tabName = "place_explorer",
@@ -203,32 +199,36 @@ place_explorer_server <- function(id) {
     observe({
     output$highest_p <- renderUI({
       
-      min_max <-
+      highlights_4 <-
         geo_dt() %>%
+        # borough %>% 
         st_drop_geometry() %>%
         select(ID, population:heat_wave_ind, -ends_with("_q3")) %>%
         mutate(across(everything(), percent_rank, .names = "{.col}_perc")) %>%
         filter(ID == geo_ID()) %>%
+        # filter(ID == "2466023_3") %>%
         select(ends_with("_perc"), -ID_perc) %>%
         tidyr::pivot_longer(cols = everything()) %>%
-        filter(value %in% c(max(value, na.rm = T), min(value, na.rm = T))) %>% 
+        mutate(dist_to_50 = abs(0.5-value)) %>% 
+        arrange(-dist_to_50) %>% 
+        slice(1:4) %>% 
         mutate(value = round(value*100, digits = 2))
 
       highlight_values <-
         geo_dt() %>%
         st_drop_geometry() %>%
         filter(ID == geo_ID()) %>%
-        select(stringr::str_remove(min_max$name, "_perc"))
+        select(stringr::str_remove(highlights_4$name, "_perc"))
       
       highlight_ouputs <- list()
 
-      for(i in 1:nrow(min_max)){
+      for(i in 1:nrow(highlights_4)){
         percent_if_proportion <- 
           if (stringr::str_detect(names(highlight_values[,i]), "_prop")) scales::percent(pull(highlight_values[1,i]), accuracy =0.1)
           else round(highlight_values[1,i], digits = 2)
         
         highlight_ouputs[i] <- 
-         glue::glue("The {stringr::str_to_lower(input$geo_scale)} selected is at the {min_max[i,2]} ",
+         glue::glue("The {stringr::str_to_lower(input$geo_scale)} selected is at the {highlights_4[i,2]} ",
                           "percentile in the {names(highlight_values)[i]} value ",
                           "at {percent_if_proportion}.")
       }
@@ -305,6 +305,7 @@ place_explorer_server <- function(id) {
           
           value <- 
             if (stringr::str_detect(names(value), "_prop")) scales::percent(pull(value), accuracy =0.1)
+          else if (stringr::str_detect(names(value), "_dollar")) glue::glue("{round(pull(value), digits=2)} $")
           else round(value, digits = 2)
           
           glue::glue("The {stringr::str_to_lower(input$geo_scale)} selected is at the ", 
