@@ -79,7 +79,8 @@ rm(CMA_MTL_BB, KV_Highway_Cars, KV_Highway_People, streets, car_streets)
    car_streets_with_names %>%
    st_transform(32618) %>%
    group_by(name) %>%
-   summarise(count = n())
+   summarise(count = n()) %>%
+   st_set_agr("constant")
 # 
 # # Save file
 # qsave(names_of_car_streets, "dev/names_of_car_streets.qs")
@@ -91,12 +92,13 @@ names_of_car_streets <- qread("dev/names_of_car_streets.qs")
 
 # Need borough level data
 # Could retrieve the file from disk too
-source("dev/callee_scripts/borough_geometries.R")
+# source("dev/callee_scripts/borough_geometries.R")
 
 # Clip by borough
 clipped_car_streets <-
   names_of_car_streets %>%
-  st_intersection(st_transform(borough, 32618))
+  st_intersection(st_transform(borough, 32618)) %>%
+  st_set_agr("constant")
 
 # Add ID
 # id <- as.numeric(rownames(names_of_car_streets))
@@ -109,59 +111,7 @@ clipped_car_streets <-
   clipped_car_streets %>%
   mutate(id = id, .before = name)
 
-rm(id, car_streets_with_names, names_of_car_streets, CT, DA, borough)
-
-# Check if in one connected cluster (names_of_car_streets) ----------------
-
-
-# ***** FUNCTIONS for the names_of_car_streets *****
-
-# returns the geometry at rownumber in LINESTRING if possible
-# (those cannot be in linear format are returned as MULTILINESTRING)
-# merged_geom <- function(rownumber){
-#  geom <- names_of_car_streets$geometry[[rownumber]]
-#  tryCatch( return(st_line_merge(geom)),
-#            error = function(c) return(geom) )
-#}
-
-# returns the number of strongly connected clusters (components) of the geometry at rownumber
-# com <- function(rownumber) {
-#  merged_geom(rownumber) %>%
-#  st_sfc() %>%
-#  st_cast("LINESTRING") %>%
-#  st_touches() %>%
-#  graph.adjlist() %>%
-#  components() %>%
-#  return()
-#}
-
-# ***** VECTORS to be merged into names_of_car_streets *****
-
-
-# T/F on whether the geometry at rownumber can be converted to LINESTRING format
-# is_in_a_line <- foreach(i = 1:nrow(names_of_car_streets), .combine=c, .packages="foreach") %do%{
-#   return(merged_geom(i) %>% st_geometry_type() == "LINESTRING")
-# }
-
-# is_in_a_line <- sapply(1:nrow(names_of_car_streets), function(i) (merged_geom(i) %>% st_geometry_type() == "LINESTRING"))
-
-
-# numbers of strongly connected clusters for each geometry
-# ngroup <- foreach(i = 1:nrow(names_of_car_streets), .combine=c, .packages="foreach") %do% com(i)$no
-
-# ngroup <- sapply(1:nrow(names_of_car_streets), function(i) com(i)$no)
-
-# ***** Merge the vectors *****
-
-# names_of_car_streets <-
-#  names_of_car_streets %>%
-#  mutate(linear = is_in_a_line) %>%
-#  mutate(numCluster = ngroup) %>%
-#  mutate(connected = (numCluster==1), .before = numCluster) %>%
-#  st_set_agr("constant")
-
-# rm(is_in_a_line, ngroup, com, merged_geom)
-
+rm(id, car_streets_with_names, names_of_car_streets)
 
 # Check if in one connected cluster (clipped_car_streets) ----------------
 # relies on borough data after running 'callee-scripts/borough_geometries.R'
@@ -203,8 +153,10 @@ clipped_car_streets <-
   mutate(regionName = name.1, .after=name.1) %>%
   mutate(regionType = name_2, .after=name_2) %>%
   select(-count, -ID, -name.1, -name_2) %>%
-  arrange(id)
+  arrange(id) %>%
+  st_set_agr("constant")
 
 # mutate(connected = com(geometry)) somehow does not work
 
 rm(c, com, is_in_a_line, merged_geom)
+

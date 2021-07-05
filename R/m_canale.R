@@ -32,7 +32,10 @@ canale_server <- function(id) {
                       left_join(colour_borough, by = "group"),
           stroke_width = 100, stroke_colour = "#FFFFFF", fill_colour = "fill", 
           update_view = FALSE, id = "ID", auto_highlight = TRUE,
-          highlight_colour = "#FFFFFF90")
+          highlight_colour = "#FFFFFF90") %>%
+        add_path(data = street, stroke_width = 1000, stroke_colour = "#0000FF",
+                 id = "street", auto_highlight = TRUE,
+                 highlight_colour = "#FFFF0090")
       })
     
     # Zoom level
