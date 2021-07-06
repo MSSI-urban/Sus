@@ -51,7 +51,7 @@ ui <- dashboardPage(
                                 # namespacing reasons!
                                 small_map_UI("canale-left")),
                startExpanded = TRUE),
-
+    
       hr(),
       
       menuItem(i18n$t("Place explorer"), tabName = "place_explorer"),

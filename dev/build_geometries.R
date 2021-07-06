@@ -77,17 +77,12 @@ source("dev/modules/climate_risk.R")
 # source("dev/modules/ped.R")
 
 
-
-# Add street data ---------------------------------------------------------
-
-source("dev/streets-test.R")
-
 # Save data files ---------------------------------------------------------
 
 qsavem(borough, CT, DA, file = "data/census.qsm")
 qsave(grid, file = "data/grid.qs")
 qsave(var_exp, file = "data/var_exp.qs")
-qsave(clipped_car_streets, "data/clipped_car_streets.qs")
+
 
 # Produce left and right maps ---------------------------------------------
 
@@ -96,4 +91,3 @@ source("dev/callee_scripts/colours.R")
 
 # Dependent script: needs 'borough' object
 source("dev/callee_scripts/produce_maps.R")
-
