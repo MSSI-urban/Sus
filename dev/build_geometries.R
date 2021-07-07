@@ -77,12 +77,16 @@ source("dev/modules/climate_risk.R")
 # source("dev/modules/ped.R")
 
 
+# Add street layer --------------------------------------------------------
+
+source("dev/streets-test.R")
+
 # Save data files ---------------------------------------------------------
 
 qsavem(borough, CT, DA, file = "data/census.qsm")
 qsave(grid, file = "data/grid.qs")
 qsave(var_exp, file = "data/var_exp.qs")
-
+qsave(clipped_car_streets, file = "data/street.qs")
 
 # Produce left and right maps ---------------------------------------------
 

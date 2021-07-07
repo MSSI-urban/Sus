@@ -9,16 +9,16 @@ library(igraph)
 # Variables ---------------------------------------------------------------
 
 # Bounding box of CMA Montreal 
-CMA_MTL_BB <- c(-74.32797, 45.21754, -73.12856, 45.96849)
-
-# Highway key values for Cars
-KV_Highway_Cars <- c("motorway", "trunk", "primary", "secondary", "tertiary",
-                     "residential", "unclassified", "service", "motorway_link",
-                     "trunk_link", "primary_link", "secondary_link", "tertiary_link")
-
-# Highway key values for People
-KV_Highway_People <- c("cycleway", "living_street", "pedestrian", "track", "road",
-                       "footway", "path", "steps", "crossing")
+# CMA_MTL_BB <- c(-74.32797, 45.21754, -73.12856, 45.96849)
+# 
+# # Highway key values for Cars
+# KV_Highway_Cars <- c("motorway", "trunk", "primary", "secondary", "tertiary",
+#                      "residential", "unclassified", "service", "motorway_link",
+#                      "trunk_link", "primary_link", "secondary_link", "tertiary_link")
+# 
+# # Highway key values for People
+# KV_Highway_People <- c("cycleway", "living_street", "pedestrian", "track", "road",
+#                        "footway", "path", "steps", "crossing")
 
 
 # Load Road ---------------------------------------------------------------
@@ -48,19 +48,19 @@ KV_Highway_People <- c("cycleway", "living_street", "pedestrian", "track", "road
 
 # -----------------------------------------------------------------
 # Read file 
-streets <- qread("dev/streets.qs")
-
-# Line streets with highway value in KV_Highway_Cars
-car_streets <-
-  streets %>% 
-  filter(highway %in% KV_Highway_Cars) %>%
-  select_if(~!all(is.na(.))) 
-
-car_streets_with_names <-
-  car_streets %>%
-  filter(!is.na(name)) %>%
-  select(osm_id, name, geometry) %>%
-  mutate(name = str_to_title(name))
+# streets <- qread("dev/streets.qs")
+# 
+# # Line streets with highway value in KV_Highway_Cars
+# car_streets <-
+#   streets %>% 
+#   filter(highway %in% KV_Highway_Cars) %>%
+#   select_if(~!all(is.na(.))) 
+# 
+# car_streets_with_names <-
+#   car_streets %>%
+#   filter(!is.na(name)) %>%
+#   select(osm_id, name, geometry) %>%
+#   mutate(name = str_to_title(name))
 
 
 # Slice streets by intersection -------------------------------------------
@@ -69,17 +69,17 @@ car_streets_with_names <-
 # car_streets_sliced <- stplanr::rnet_breakup_vertices(car_streets)
 # ppl_streets_sliced <- stplanr::rnet_breakup_vertices(ppl_streets)
 
-rm(CMA_MTL_BB, KV_Highway_Cars, KV_Highway_People, streets, car_streets)
+# rm(CMA_MTL_BB, KV_Highway_Cars, KV_Highway_People, streets, car_streets)
 
 # Group streets by name ---------------------------------------------------
 
 # # Names of the car streets in CMA MTL
 # # Takes a while to run (< 5 mins)
- names_of_car_streets <-
-   car_streets_with_names %>%
-   st_transform(32618) %>%
-   group_by(name) %>%
-   summarise(count = n())
+ # names_of_car_streets <-
+ #   car_streets_with_names %>%
+ #   st_transform(32618) %>%
+ #   group_by(name) %>%
+ #   summarise(count = n())
 # 
 # # Save file
 # qsave(names_of_car_streets, "dev/names_of_car_streets.qs")
@@ -91,12 +91,14 @@ names_of_car_streets <- qread("dev/names_of_car_streets.qs")
 
 # Need borough level data
 # Could retrieve the file from disk too
-source("dev/callee_scripts/borough_geometries.R")
+# source("dev/callee_scripts/borough_geometries.R")
 
 # Clip by borough
 clipped_car_streets <-
   names_of_car_streets %>%
-  st_intersection(st_transform(borough, 32618))
+  st_intersection(st_transform(borough, 32618)) %>%
+  st_as_sf() %>%
+  st_set_agr("constant")
 
 # Add ID
 # id <- as.numeric(rownames(names_of_car_streets))
@@ -109,7 +111,7 @@ clipped_car_streets <-
   clipped_car_streets %>%
   mutate(id = id, .before = name)
 
-rm(id, car_streets_with_names, names_of_car_streets, CT, DA, borough)
+rm(id, car_streets_with_names, names_of_car_streets)
 
 # Check if in one connected cluster (names_of_car_streets) ----------------
 

@@ -30,9 +30,13 @@ canale_server <- function(id) {
         add_polygon(data = borough %>%
                       mutate(group = paste(canale_ind_q3, "- 1")) %>%
                       left_join(colour_borough, by = "group"),
-          stroke_width = 100, stroke_colour = "#FFFFFF", fill_colour = "fill", 
+          stroke_width = 100, stroke_colour = "#FFFFFF", fill_colour = "fill",
           update_view = FALSE, id = "ID", auto_highlight = TRUE,
-          highlight_colour = "#FFFFFF90")
+          highlight_colour = "#FFFFFF90", layer_id = "poly") %>%
+        add_path(data = street,
+                 stroke_width = 2, stroke_colour = "#A2A2A2",
+                 update_view = FALSE, layer_id = "street", id = "id",
+                 auto_highlight = TRUE, highlight_colour = "#FF000090")
       })
     
     # Zoom level
@@ -72,13 +76,20 @@ canale_server <- function(id) {
       rv_canale$zoom}, {
         width <- switch(rv_canale$zoom, "borough" = 100, "CT" = 10, 2)
         mapdeck_update(map_id = NS(id, "map")) %>%
+          clear_polygon(layer_id = "poly") %>%
+          clear_path(layer_id = "street") %>%
           add_polygon(
             data = data_canale(), stroke_width = width,
             stroke_colour = "#FFFFFF", fill_colour = "fill",
             update_view = FALSE, id = "ID", auto_highlight = TRUE,
-            highlight_colour = "#FFFFFF90")
+            highlight_colour = "#FFFFFF90", layer_id = "poly") %>%
+          add_path(
+            data = street,
+            stroke_width = 2, stroke_colour = "#A2A2A2",
+            update_view = FALSE, layer_id = "street", id = "id",
+            auto_highlight = TRUE, highlight_colour = "#FF000090")
         })
-    
+
     # Update poly_selected on click
     observeEvent(input$map_polygon_click, {
       lst <- jsonlite::fromJSON(input$map_polygon_click)
@@ -86,7 +97,7 @@ canale_server <- function(id) {
         rv_canale$poly_selected <- NA
       } else rv_canale$poly_selected <- lst$object$properties$id
       })
-    
+
     # Clear poly_selected on zoom
     observeEvent(rv_canale$zoom, {rv_canale$poly_selected <- NA},
                  ignoreInit = TRUE)
@@ -111,7 +122,7 @@ canale_server <- function(id) {
           clear_polygon(layer_id = "poly_highlight")
         }
       })
-    
+
     # Clear click status if prompted
     # (Namespacing hardwired to explore module; could make it return a reactive)
     observeEvent(input$`explore-clear_selection`, {
