@@ -25,6 +25,7 @@ shinyServer(function(input, output, session) {
   climate_risk_server("climate_risk")
   # mode_switch_server("mode_switch")
   # accessibility_server("accessibility")
+  street_server("street")
   why_dash_server("why_dash")
   meet_the_team_server("meet_the_team")
 

@@ -32,11 +32,7 @@ canale_server <- function(id) {
                       left_join(colour_borough, by = "group"),
           stroke_width = 100, stroke_colour = "#FFFFFF", fill_colour = "fill",
           update_view = FALSE, id = "ID", auto_highlight = TRUE,
-          highlight_colour = "#FFFFFF90", layer_id = "poly") %>%
-        add_path(data = street,
-                 stroke_width = 2, stroke_colour = "#A2A2A2",
-                 update_view = FALSE, layer_id = "street", id = "id",
-                 auto_highlight = TRUE, highlight_colour = "#FF000090")
+          highlight_colour = "#FFFFFF90", layer_id = "poly")
       })
     
     # Zoom level
@@ -77,17 +73,11 @@ canale_server <- function(id) {
         width <- switch(rv_canale$zoom, "borough" = 100, "CT" = 10, 2)
         mapdeck_update(map_id = NS(id, "map")) %>%
           clear_polygon(layer_id = "poly") %>%
-          clear_path(layer_id = "street") %>%
           add_polygon(
             data = data_canale(), stroke_width = width,
             stroke_colour = "#FFFFFF", fill_colour = "fill",
             update_view = FALSE, id = "ID", auto_highlight = TRUE,
-            highlight_colour = "#FFFFFF90", layer_id = "poly") %>%
-          add_path(
-            data = street,
-            stroke_width = 2, stroke_colour = "#A2A2A2",
-            update_view = FALSE, layer_id = "street", id = "id",
-            auto_highlight = TRUE, highlight_colour = "#FF000090")
+            highlight_colour = "#FFFFFF90", layer_id = "poly")
         })
 
     # Update poly_selected on click
@@ -97,10 +87,12 @@ canale_server <- function(id) {
         rv_canale$poly_selected <- NA
       } else rv_canale$poly_selected <- lst$object$properties$id
       })
-
+    
     # Clear poly_selected on zoom
-    observeEvent(rv_canale$zoom, {rv_canale$poly_selected <- NA},
-                 ignoreInit = TRUE)
+    observeEvent(rv_canale$zoom, {
+      rv_canale$poly_selected <- NA
+      },
+      ignoreInit = TRUE)
 
     # Update map in response to poly_selected change
     observeEvent(rv_canale$poly_selected, {

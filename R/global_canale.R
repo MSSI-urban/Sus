@@ -5,7 +5,8 @@ token_canale <- paste0("pk.eyJ1IjoiZHdhY2hzbXV0aCIsImEiOiJja2g2Y2JpbDc",
                        "wMDc5MnltbWpja2xpYTZhIn0.BXdU7bsQYWcSwmmBx8DNqQ")
 
 # Initialize reactive values
-rv_canale <- reactiveValues(poly_selected = NA, zoom = "borough")
+rv_canale <- reactiveValues(poly_selected = NA,
+                            zoom = "borough")
 
 # Dropdown menu
 var_list_canale <- 
