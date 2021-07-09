@@ -121,7 +121,7 @@ ui <- dashboardPage(
       tabItem(tabName = "canale", canale_UI("canale")),
       tabItem(tabName = "ped", ped_UI("ped")),
       tabItem(tabName = "climate_risk", climate_risk_UI("climate_risk")),
-      # tabItem(tabName = "mode", Mode_switch_module_UI("Mode_switch_module")),
+      tabItem(tabName = "mode", Mode_switch_module_UI("Mode_switch_module")),
       # tabItem(tabName = "biodiversity", Biodiversity_module_UI("biodiversity_module", i18n = i18n)),
       # tabItem(tabName = "accessibility", Accessibility_module_UI("accessibility_module", i18n = i18n)),
       tabItem(tabName = "housing", housing_UI("housing")),

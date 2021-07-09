@@ -38,20 +38,20 @@ stdh_cast_substring <- function(x, to = "MULTILINESTRING") {
   return(endgeom)
 } 
 
-load(file="MSSI-Demonstration/Rdata/Potential_Car.Rdata")
-scenario <- potential_car[potential_car$Cycling_Dist <= 4340 & 
-                            potential_car$Elevation_Gain <= 45 & 
-                            potential_car$Time_Ratio <=2.46,] #select cyclable trips
-
-##calculate number of cyclable trips on road segments##
-car <- scenario[which(scenario$Car>0),]
-car_segments <- stdh_cast_substring(car, "LINESTRING") #Spline lines into segments
-car_segments$grp = sapply(st_equals(car_segments), max) #Identify duplicate geometries
-car_final <- car_segments %>% group_by(grp) %>% summarise(total_car = sum(Car)) #car_final is used to create a map
-
-##Calculate VMT and GHG reduction per day
-sum(car$Car) #number of cyclable trips
-sum(car$Car*car$Car_Dist*0.0006) #VMT reduction
-sum(car$Car*car$Car_Dist/100000*19) #GHG reduction (kg)
+# load(file="MSSI-Demonstration/Rdata/Potential_Car.Rdata")
+# scenario <- potential_car[potential_car$Cycling_Dist <= 4340 & 
+#                             potential_car$Elevation_Gain <= 45 & 
+#                             potential_car$Time_Ratio <=2.46,] #select cyclable trips
+# 
+# ##calculate number of cyclable trips on road segments##
+# car <- scenario[which(scenario$Car>0),]
+# car_segments <- stdh_cast_substring(car, "LINESTRING") #Spline lines into segments
+# car_segments$grp = sapply(st_equals(car_segments), max) #Identify duplicate geometries
+# car_final <- car_segments %>% group_by(grp) %>% summarise(total_car = sum(Car)) #car_final is used to create a map
+# 
+# ##Calculate VMT and GHG reduction per day
+# sum(car$Car) #number of cyclable trips
+# sum(car$Car*car$Car_Dist*0.0006) #VMT reduction
+# sum(car$Car*car$Car_Dist/100000*19) #GHG reduction (kg)
 
 
