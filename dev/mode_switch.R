@@ -39,8 +39,8 @@ stdh_cast_substring <- function(x, to = "MULTILINESTRING") {
 } 
 
 # load(file="MSSI-Demonstration/Rdata/Potential_Car.Rdata")
-# scenario <- potential_car[potential_car$Cycling_Dist <= 4340 & 
-#                             potential_car$Elevation_Gain <= 45 & 
+# scenario <- potential_car[potential_car$Cycling_Dist <= 4340 &
+#                             potential_car$Elevation_Gain <= 45 &
 #                             potential_car$Time_Ratio <=2.46,] #select cyclable trips
 # 
 # ##calculate number of cyclable trips on road segments##

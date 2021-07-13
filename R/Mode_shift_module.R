@@ -119,20 +119,20 @@ Mode_switch_module_server <- function(id) {
   moduleServer(id,
                function(input, output, session) {
 
-                 # loadRData <- function(fileName){
-                 #   #loads an RData file, and returns it
-                 #   load(fileName)
-                 #   get(ls()[ls() != "fileName"])
-                 # }
-                 # 
-                 # cycling1 <- loadRData("data/car_1_finals.Rdata")
-                 # cycling2 <- loadRData("data/car_3_finals.Rdata")
-                 # cycling_network <- loadRData("data/reseau_cyclable.Rdata")
-                 # car_share <- loadRData("data/Car_Share.Rdata")
-                 # cycling_access <- loadRData("data/Cycling_Access.Rdata")
-                 # trip_distance <- loadRData("data/Trip_Distance.Rdata")
-                 # 
-                 # load("data/cycling_total_final.Rdata")
+                 loadRData <- function(fileName){
+                   #loads an RData file, and returns it
+                   load(fileName)
+                   get(ls()[ls() != "fileName"])
+                 }
+
+                 cycling1 <- loadRData("data/car_1_finals.Rdata")
+                 cycling2 <- loadRData("data/car_3_finals.Rdata")
+                 cycling_network <- loadRData("data/reseau_cyclable.Rdata")
+                 car_share <- loadRData("data/Car_Share.Rdata")
+                 cycling_access <- loadRData("data/Cycling_Access.Rdata")
+                 trip_distance <- loadRData("data/Trip_Distance.Rdata")
+
+                 load("data/cycling_total_final.Rdata")
 
 
 

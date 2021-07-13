@@ -23,7 +23,7 @@ shinyServer(function(input, output, session) {
   canale_server("canale")
   ped_server("ped")
   climate_risk_server("climate_risk")
-  Mode_switch_module_server("mode_switch")
+  # Mode_switch_module_server("mode_switch")
   # accessibility_server("accessibility")
   housing_server("housing")
   why_dash_server("why_dash")

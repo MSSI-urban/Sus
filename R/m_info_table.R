@@ -260,6 +260,6 @@ info_table_server <- function(id, x, var_left, var_right, select, zoom,
       #     }
       
       return(out)  
-      })
+      }) 
   })
 }
