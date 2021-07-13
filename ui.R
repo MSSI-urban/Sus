@@ -21,55 +21,55 @@ ui <- dashboardPage(
       id = "tabs", shiny.i18n::usei18n(i18n),
       
       menuItem(i18n$t("Home"), tabName = "home"),
-      
-      menuItem(i18n$t("Climate change"), tabName = "climate",
-               
-               menuSubItem(i18n$t("Climate change risk"), tabName = "climate_risk"),
-               conditionalPanel(condition = "input.tabs == 'climate_risk'",
-                                # The ID here needs to be duplicated for complicated
-                                # namespacing reasons!
-                                small_map_UI("climate_risk-left")),
-               startExpanded = TRUE),
-      
-      menuItem(i18n$t("Covid-19"), tabName = "covid",
-               menuSubItem(i18n$t("Pedestrian realm"), tabName = "ped"),
-               startExpanded = TRUE),
-      
-      menuItem(i18n$t("Ecology"), tabName = "ecology",
-               menuSubItem(i18n$t("Biodiversity"), tabName = "biodiversity"),
-               startExpanded = TRUE),
-      
+
+      # menuItem(i18n$t("Climate change"), tabName = "climate",
+      # 
+      #          menuSubItem(i18n$t("Climate change risk"), tabName = "climate_risk"),
+      #          conditionalPanel(condition = "input.tabs == 'climate_risk'",
+      #                           # The ID here needs to be duplicated for complicated
+      #                           # namespacing reasons!
+      #                           small_map_UI("climate_risk-left")),
+      #          startExpanded = TRUE),
+      # 
+      # menuItem(i18n$t("Covid-19"), tabName = "covid",
+      #          menuSubItem(i18n$t("Pedestrian realm"), tabName = "ped"),
+      #          startExpanded = TRUE),
+      # 
+      # menuItem(i18n$t("Ecology"), tabName = "ecology",
+      #          menuSubItem(i18n$t("Biodiversity"), tabName = "biodiversity"),
+      #          startExpanded = TRUE),
+
       menuItem(i18n$t("Transport"), tabName = "transport",
                menuSubItem(i18n$t("Accessibility to urban opportunities"), tabName = "accessibility"),
                menuSubItem(i18n$t("Commuter mode switching"), tabName = "mode"),
-               startExpanded = TRUE),
-      
-      menuItem(i18n$t("Urban life"), tabName = "urban_life",
-               menuSubItem(i18n$t("Active living potential"), tabName = "canale"),
-               conditionalPanel(condition = "input.tabs == 'canale'",
-                                # The ID here needs to be duplicated for complicated
-                                # namespacing reasons!
-                                small_map_UI("canale-left")),
-               startExpanded = TRUE),
-      
-      menuItem(i18n$t("Housing realm"), tabName = "housing_realm",
-               menuSubItem(i18n$t("Housing"), tabName = "housing"),
-               conditionalPanel(condition = "input.tabs == 'housing'",
-                                # The ID here needs to be duplicated for complicated
-                                # namespacing reasons!
-                                small_map_UI("housing-left")),
-               startExpanded = TRUE),
-    
-      hr(),
-      
-      menuItem(i18n$t("Place explorer"), tabName = "place_explorer"),
-      
-      hr(),
-      
-      menuItem(i18n$t("Why a dashboard?"), tabName = "why_dash"),
-      
-      menuItem(i18n$t("Meet the team"), tabName = "meet_the_team")
-      
+               startExpanded = TRUE)
+
+      # menuItem(i18n$t("Urban life"), tabName = "urban_life",
+      #          menuSubItem(i18n$t("Active living potential"), tabName = "canale"),
+      #          conditionalPanel(condition = "input.tabs == 'canale'",
+      #                           # The ID here needs to be duplicated for complicated
+      #                           # namespacing reasons!
+      #                           small_map_UI("canale-left")),
+      #          startExpanded = TRUE),
+      # 
+      # menuItem(i18n$t("Housing realm"), tabName = "housing_realm",
+      #          menuSubItem(i18n$t("Housing"), tabName = "housing"),
+      #          conditionalPanel(condition = "input.tabs == 'housing'",
+      #                           # The ID here needs to be duplicated for complicated
+      #                           # namespacing reasons!
+      #                           small_map_UI("housing-left")),
+      #          startExpanded = TRUE),
+      # 
+      # hr(),
+      # 
+      # menuItem(i18n$t("Place explorer"), tabName = "place_explorer"),
+      # 
+      # hr(),
+      # 
+      # menuItem(i18n$t("Why a dashboard?"), tabName = "why_dash"),
+      # 
+      # menuItem(i18n$t("Meet the team"), tabName = "meet_the_team")
+
       ), 
     collapsed = FALSE),
   
@@ -118,15 +118,17 @@ ui <- dashboardPage(
       )), 
       
       # Modules
-      tabItem(tabName = "canale", canale_UI("canale")),
-      tabItem(tabName = "ped", ped_UI("ped")),
-      tabItem(tabName = "climate_risk", climate_risk_UI("climate_risk")),
-      # tabItem(tabName = "mode", Mode_switch_module_UI("Mode_switch_module")),
-      # tabItem(tabName = "biodiversity", Biodiversity_module_UI("biodiversity_module", i18n = i18n)),
-      # tabItem(tabName = "accessibility", Accessibility_module_UI("accessibility_module", i18n = i18n)),
-      tabItem(tabName = "housing", housing_UI("housing")),
-      tabItem(tabName = "why_dash", why_dash_UI("why_dash")),
-      tabItem(tabName = "meet_the_team", meet_the_team_UI("meet_the_team"))
+      # tabItem(tabName = "canale", canale_UI("canale")),
+      # tabItem(tabName = "ped", ped_UI("ped")),
+      # tabItem(tabName = "climate_risk", climate_risk_UI("climate_risk")),
+      # 
+      # # tabItem(tabName = "biodiversity", Biodiversity_module_UI("biodiversity_module", i18n = i18n)),
+      # # tabItem(tabName = "accessibility", Accessibility_module_UI("accessibility_module", i18n = i18n)),
+      # tabItem(tabName = "housing", housing_UI("housing")),
+      # tabItem(tabName = "why_dash", why_dash_UI("why_dash")),
+      # tabItem(tabName = "meet_the_team", meet_the_team_UI("meet_the_team"))
+      
+      tabItem(tabName = "mode", Mode_switch_module_UI("Mode_switch_module"))
       
     )
   ),

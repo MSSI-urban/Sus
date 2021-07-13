@@ -20,14 +20,15 @@ shinyServer(function(input, output, session) {
   
   # Modules -----------------------------------------------------------------
 
-  canale_server("canale")
-  ped_server("ped")
-  climate_risk_server("climate_risk")
-  # Mode_switch_module_server("mode_switch")
+  # canale_server("canale")
+  # ped_server("ped")
+  # climate_risk_server("climate_risk")
   # accessibility_server("accessibility")
-  housing_server("housing")
-  why_dash_server("why_dash")
-  meet_the_team_server("meet_the_team")
+  # housing_server("housing")
+  # why_dash_server("why_dash")
+  # meet_the_team_server("meet_the_team")
+  
+  Mode_switch_module_server("mode_switch")
 
     
   # Waiter ------------------------------------------------------------------
