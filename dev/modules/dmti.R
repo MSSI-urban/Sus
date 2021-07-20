@@ -10,7 +10,36 @@
 #   select(UID, NAME, ADDRESS, CITY, MUNICIPAL, POST_CODE, SIC_1, SIC_DIV)
 # qsave(dmti, "dev/data/dmti_2016.qs")
 
-dmti <- qread("dev/data/dmti_2016.qs")
+# Read DMTI shapefiles and add 'year' column
+
+dmti_2006 <- st_read("dev/data/dmti_shp/dmti_2006.shp") %>% 
+  mutate(year = 2006, .before = geometry)
+dmti_2011 <- st_read("dev/data/dmti_shp/dmti_2011.shp") %>% 
+  mutate(year = 2011, .before = geometry) 
+dmti_2016 <- st_read("dev/data/dmti_shp/dmti_2016.shp") %>% 
+  mutate(year = 2016, .before = geometry) 
+dmti_2020 <- st_read("dev/data/dmti_shp/dmti_2020.shp") %>% 
+  mutate(year = 2020, .before = geometry)
+
+# transform df, select relevant variables
+
+clean_dmti <- function(d) {
+  d %>%
+    st_transform(32618) %>% 
+    st_set_agr("constant") %>% 
+    select(poi_id = POI_ID, name = NAME, address = ADDRESS, city = CITY, 
+           post_code = POST_CODE, sic_1 = SIC_1, sic_div = SIC_DIV, year)
+}
+
+dmti_2006 <- dmti_2006 %>% clean_dmti()
+dmti_2011 <- dmti_2011 %>% clean_dmti()
+dmti_2016 <- dmti_2016 %>% clean_dmti()
+dmti_2020 <- dmti_2020 %>% clean_dmti()
+
+# Row bind all DMTI data sets to create new df, remove old dfs
+
+dmti <- rbind(dmti_2006, dmti_2011, dmti_2016, dmti_2020)
+rm(dmti_2006, dmti_2011, dmti_2016, dmti_2020)
 
 
 # Define filter vectors ---------------------------------------------------
@@ -73,7 +102,7 @@ process_DMTI <- function(x) {
     mutate(across(filter_vectors, ntile, n = 3, .names = "{.col}_q3"), 
            .before = geometry) %>% 
     st_set_agr("constant")
-  }
+}
 
 points <- map(list(borough, CT, DA, grid), process_DMTI)
 
@@ -97,7 +126,7 @@ var_exp <-
   add_row(
     var_code = "healthy_food_prop",
     var_name = "Healthy food destinations (%)",
-    explanation = "the percentage of food destinations which serve healthy food") %>% 
+    explanation = "the percentage of food destinations which sell healthy food") %>% 
   add_row(
     var_code = "walkable_prop",
     var_name = "Walkable retail destinations (%)",
