@@ -1,4 +1,4 @@
-# Import grid geometries --------------------------------------------------
+#### Import grid geometries ####################################################
 # Independent script 
 
 grid <-

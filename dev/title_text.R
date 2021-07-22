@@ -16,6 +16,12 @@ title_text <-
           text = "Housing is important", .before = 6) %>% 
   add_row(tab = "housing", type = "extra",
           text = "VERY important", .before = 6) %>% 
-  mutate(tab = if_else(tab == "pedestrian_ct", "ped", tab))
-
+  mutate(tab = if_else(tab == "pedestrian_ct", "ped", tab)) %>% 
+  add_row(tab = "alley", type = "title",
+          text = "Green alleys") %>% 
+  add_row(tab = "alley", type = "main",
+          text = "Text TKTK") %>% 
+  add_row(tab = "alley", type = "extra",
+          text = "Text TKTK") 
+  
 qsave(title_text, "data/title_text.qs")

@@ -6,11 +6,13 @@ canale_UI <- function(id) {
   tabItem(tabName = "canale",
           mapdeckOutput(NS(id, "map"), height = "92vh"),
           title_UI(NS(id, "title")),
-          right_panel(id, 
+          right_panel(id,
                       compare_UI(NS(id, "canale"), var_list_canale),
                       explore_UI(NS(id, "explore")),
-                      dyk_UI(NS(id, "dyk"))),
-          legend_bivar_UI(NS(id, "canale")))
+                      dyk_UI(NS(id, "dyk"))
+                      ),
+          legend_bivar_UI(NS(id, "canale"))
+          )
   }
 
 
@@ -46,10 +48,12 @@ canale_server <- function(id) {
     # Compare panel
     var_right_canale <- compare_server("canale", var_list_canale,
                                        reactive(rv_canale$zoom))
-    
-    # Data 
-    data_canale <- data_server("canale", reactive("canale_ind"), 
-                               var_right_canale, reactive(rv_canale$zoom))
+
+    # Data
+    data_canale <- data_server(id = "canale",
+                               var_left = reactive("canale_ind"),
+                               var_right = var_right_canale,
+                               df = reactive(rv_canale$zoom))
     
     # Explore panel
     explore_server("explore", data_canale, reactive("canale_ind"),
@@ -78,7 +82,7 @@ canale_server <- function(id) {
             update_view = FALSE, id = "ID", auto_highlight = TRUE,
             highlight_colour = "#FFFFFF90")
         })
-    
+
     # Update poly_selected on click
     observeEvent(input$map_polygon_click, {
       lst <- jsonlite::fromJSON(input$map_polygon_click)
@@ -86,7 +90,7 @@ canale_server <- function(id) {
         rv_canale$poly_selected <- NA
       } else rv_canale$poly_selected <- lst$object$properties$id
       })
-    
+
     # Clear poly_selected on zoom
     observeEvent(rv_canale$zoom, {rv_canale$poly_selected <- NA},
                  ignoreInit = TRUE)
@@ -111,7 +115,7 @@ canale_server <- function(id) {
           clear_polygon(layer_id = "poly_highlight")
         }
       })
-    
+
     # Clear click status if prompted
     # (Namespacing hardwired to explore module; could make it return a reactive)
     observeEvent(input$`explore-clear_selection`, {

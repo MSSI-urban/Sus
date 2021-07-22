@@ -37,9 +37,18 @@ data_server <- function(id, var_left, var_right, df, zoom = df) {
   
   moduleServer(id, function(input, output, session) {
     reactive({
+      
+      # Get borough/CT/DA/grid, and turn DA_2 into DA
       data <- get(sub("_2", "", df()))
+      
+      # Set the colour transparency based on zoom level
       colour <- get(paste0("colour_", zoom()))
 
+      # # Create proper var_left/var_right strings based on time
+      # var_left <- paste0(var_left(), if (!missing(time)) "_", time)
+      # if (var_right() != " ") var_right <- paste0(var_right(), 
+      #                                             if (!missing(time)) "_", time)
+      
       if (var_right() == " ") {
         data <-
           data %>%

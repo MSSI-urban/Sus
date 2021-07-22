@@ -22,52 +22,115 @@ ui <- dashboardPage(
       
       menuItem(i18n$t("Home"), tabName = "home"),
       
-      menuItem(i18n$t("Climate change"), tabName = "climate",
-               
-               menuSubItem(i18n$t("Climate change risk"), tabName = "climate_risk"),
-               conditionalPanel(condition = "input.tabs == 'climate_risk'",
-                                # The ID here needs to be duplicated for complicated
-                                # namespacing reasons!
-                                small_map_UI("climate_risk-left")),
-               startExpanded = TRUE),
+      # Climate ----
+      menuItem(
+        i18n$t("Climate change"),
+        tabName = "climate",
+
+        # Climate change risk
+        menuSubItem(
+          i18n$t("Climate change risk"),
+          tabName = "climate_risk"),
+        conditionalPanel(
+          condition = "input.tabs == 'climate_risk'",
+          # The ID needs to be duplicated for complicated namespacing reasons!
+          small_map_UI("climate_risk-left")),
+
+        startExpanded = TRUE),
       
-      menuItem(i18n$t("Covid-19"), tabName = "covid",
-               menuSubItem(i18n$t("Pedestrian realm"), tabName = "ped"),
-               startExpanded = TRUE),
+      # Covid ----
+      menuItem(
+        i18n$t("Covid-19"),
+        tabName = "covid",
+
+        # Pedestrian realm
+        menuSubItem(
+          i18n$t("Pedestrian realm"),
+          tabName = "ped"),
+
+        startExpanded = TRUE),
+
+      # Ecology ----
+      menuItem(
+        i18n$t("Ecology"),
+        tabName = "ecology",
+
+        # Biodiversity
+        menuSubItem(
+          i18n$t("Biodiversity"),
+          tabName = "biodiversity"),
+
+        startExpanded = TRUE),
       
-      menuItem(i18n$t("Ecology"), tabName = "ecology",
-               menuSubItem(i18n$t("Biodiversity"), tabName = "biodiversity"),
-               startExpanded = TRUE),
+      # Housing realm
+      menuItem(
+        i18n$t("Housing realm"),
+        tabName = "housing_realm",
+        
+        # Housing
+        menuSubItem(
+          i18n$t("Housing"),
+          tabName = "housing"),
+        conditionalPanel(
+          condition = "input.tabs == 'housing'",
+          # The ID needs to be duplicated for complicated namespacing reasons!
+          # small_map_UI("housing-left")
+        ),
+        
+        startExpanded = TRUE),
       
-      menuItem(i18n$t("Transport"), tabName = "transport",
-               menuSubItem(i18n$t("Accessibility to urban opportunities"), tabName = "accessibility"),
-               menuSubItem(i18n$t("Commuter mode switching"), tabName = "mode"),
-               startExpanded = TRUE),
+      # Transport ----
+      menuItem(
+        i18n$t("Transport"),
+        tabName = "transport",
+
+        # Accessibility
+        menuSubItem(
+          i18n$t("Accessibility to urban opportunities"),
+          tabName = "accessibility"),
+
+        # Mode switching
+        menuSubItem(
+          i18n$t("Commuter mode switching"),
+          tabName = "mode"),
+        
+        # Safety
+        menuSubItem(
+          i18n$t("Safety"),
+          tabName = "crash"),
+
+        startExpanded = TRUE),
       
-      menuItem(i18n$t("Urban life"), tabName = "urban_life",
-               menuSubItem(i18n$t("Active living potential"), tabName = "canale"),
-               conditionalPanel(condition = "input.tabs == 'canale'",
-                                # The ID here needs to be duplicated for complicated
-                                # namespacing reasons!
-                                small_map_UI("canale-left")),
-               startExpanded = TRUE),
+      # Urban life
+      menuItem(
+        i18n$t("Urban life"),
+        tabName = "urban_life",
+
+        # CanALE
+        menuSubItem(
+          i18n$t("Active living potential"),
+          tabName = "canale"),
+        conditionalPanel(
+          condition = "input.tabs == 'canale'",
+          # The ID needs to be duplicated for complicated namespacing reasons!
+          small_map_UI("canale-left")),
+
+        # Green alleys
+        menuSubItem(
+          i18n$t("Green alleys"),
+          tabName = "alley"),
+        conditionalPanel(
+          condition = "input.tabs == 'alley'",
+          # The ID needs to be duplicated for complicated namespacing reasons!
+          small_map_UI("alley-left")
+          ),
+
+        startExpanded = TRUE),
       
-      menuItem(i18n$t("Housing realm"), tabName = "housing_realm",
-               menuSubItem(i18n$t("Housing"), tabName = "housing"),
-               conditionalPanel(condition = "input.tabs == 'housing'",
-                                # The ID here needs to be duplicated for complicated
-                                # namespacing reasons!
-                                small_map_UI("housing-left")),
-               startExpanded = TRUE),
-    
       hr(),
-      
       menuItem(i18n$t("Place explorer"), tabName = "place_explorer"),
-      
       hr(),
-      
       menuItem(i18n$t("Why a dashboard?"), tabName = "why_dash"),
-      
       menuItem(i18n$t("Meet the team"), tabName = "meet_the_team")
       
       ), 
@@ -88,10 +151,8 @@ ui <- dashboardPage(
     waiter::waiter_show_on_load(
       html = shiny::tagList(img(src = "Sus_logo_LoadPage.png", 
                                 style = "height:50vh; max-height:600px;"), 
-                            spin_folding_cube(), 
-        ), 
+                            spin_folding_cube()), 
       color = "#D8F5FF"),
-    
     
     absolutePanel(
       id = "language_button", 
@@ -109,24 +170,31 @@ ui <- dashboardPage(
       # Home page
       tabItem(tabName = "home", fluidPage(
         id = 'home', tags$style('#home {background-color: #FFFFFF;}'),
-        fluidRow(img(src = "SUSLOGO.png", style = "height:65vh; max-height:600px;"), align = "center"),
+        fluidRow(
+          img(src = "SUSLOGO.png", style = "height:65vh; max-height:600px;"), 
+          align = "center"),
         fluidRow(hr()),
-        fluidRow(img(src = "mssi_logo.png", style = "height:10vh; max-height:70px"), align = "center"),
-        fluidRow(HTML(paste0(
-          "<h5>An initiative of the <a href = 'https://www.mcgill.ca/mssi/'>McGill ",
-          "Sustainability Systems Initiative</a></h5>")), align = "center")
+        fluidRow(
+          img(src = "mssi_logo.png", style = "height:10vh; max-height:70px"), 
+          align = "center"),
+        fluidRow(
+          HTML(paste0(
+            "<h5>An initiative of the <a href = 'https://www.mcgill.ca/mssi/'>McGill ",
+            "Sustainability Systems Initiative</a></h5>")), align = "center")
       )), 
       
       # Modules
-      tabItem(tabName = "canale", canale_UI("canale")),
-      tabItem(tabName = "ped", ped_UI("ped")),
-      tabItem(tabName = "climate_risk", climate_risk_UI("climate_risk")),
-      # tabItem(tabName = "mode", Mode_switch_module_UI("Mode_switch_module")),
-      # tabItem(tabName = "biodiversity", Biodiversity_module_UI("biodiversity_module", i18n = i18n)),
       # tabItem(tabName = "accessibility", Accessibility_module_UI("accessibility_module", i18n = i18n)),
+      tabItem(tabName = "alley", alley_UI("alley")),
+      # tabItem(tabName = "biodiversity", Biodiversity_module_UI("biodiversity_module", i18n = i18n)),
+      tabItem(tabName = "canale", canale_UI("canale")),
+      tabItem(tabName = "climate_risk", climate_risk_UI("climate_risk")),
+      tabItem(tabName = "crash", crash_UI("crash")),
       tabItem(tabName = "housing", housing_UI("housing")),
-      tabItem(tabName = "why_dash", why_dash_UI("why_dash")),
-      tabItem(tabName = "meet_the_team", meet_the_team_UI("meet_the_team"))
+      tabItem(tabName = "meet_the_team", meet_the_team_UI("meet_the_team")),
+      # tabItem(tabName = "mode", Mode_switch_module_UI("Mode_switch_module")),
+      # tabItem(tabName = "ped", ped_UI("ped")),
+      tabItem(tabName = "why_dash", why_dash_UI("why_dash"))
       
     )
   ),

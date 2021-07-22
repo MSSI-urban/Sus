@@ -32,6 +32,8 @@ info_table_server <- function(id, x, var_left, var_right, select, zoom,
                                 var_left_title, var_right_title,
                                 var_left_label, var_right_label)
       
+      print(z$table_type)
+      
       # Special case for Kahnawake
       if (z$table_type == "kah_na") {
         out <- HTML(glue(sus_translate(paste0(
@@ -103,31 +105,31 @@ info_table_server <- function(id, x, var_left, var_right, select, zoom,
           "of {z$scale_plural} in the Montreal region."))))
       }
       
-      # # Bivariate, quantitative, no selection
-      # if (z$table_type == "bivariate_all") {
-      #   # If correlation is close to zero
-      #   if (z$correlation < 0.05 && z$correlation > -0.05) {
-      #     out <- HTML(glue(sus_translate(paste0(
-      #       "<p>'{z$var_name}' is {z$exp_right}.",
-      #       "<p>The {z$title} has effectively no correlation ",
-      #       "({z$correlation}) with {z$exp_right} at the ",
-      #       "{z$scale_singular} scale.", 
-      #       "<p>This means that, at the {z$scale_singular} scale, ",
-      #       "there is no relationship between the two variables."))))
-      #     } else {
-      #       out <- HTML(glue(sus_translate(paste0(
-      #         "<p>'{z$var_name}' is {z$exp_right}.",
-      #         "<p>The {z$title} has a {z$strong_weak} {z$pos_neg} ",
-      #         "correlation ({z$correlation}) with {z$exp_right} at ",
-      #         "the {z$scale_singular} scale.",
-      #         "<p>This means that, in general, {z$scale_plural} with higher ",
-      #         "potential for active living tend to have {z$higher_lower} ",
-      #         "values for '{z$tolower(var_name)}', {z$high_low_disclaimer}."))))
-      #       }
-      #   
-      #   return(out)
-      # }
-      # 
+      # Bivariate, quantitative, no selection
+      if (z$table_type == "bi_quant_xy_all") {
+        # If correlation is close to zero
+        if (z$correlation < 0.05 && z$correlation > -0.05) {
+          out <- HTML(glue(sus_translate(paste0(
+            "<p>'{z$var_name}' is {z$exp_right}.",
+            "<p>The {z$title} has effectively no correlation ",
+            "({z$correlation}) with {z$exp_right} at the ",
+            "{z$scale_singular} scale.",
+            "<p>This means that, at the {z$scale_singular} scale, ",
+            "there is no relationship between the two variables."))))
+          } else {
+            out <- HTML(glue(sus_translate(paste0(
+              "<p>'{z$var_name}' is {z$exp_right}.",
+              "<p>The {z$title} has a {z$strong_weak} {z$pos_neg} ",
+              "correlation ({z$correlation}) with {z$exp_right} at ",
+              "the {z$scale_singular} scale.",
+              "<p>This means that, in general, {z$scale_plural} with higher ",
+              "potential for active living tend to have {z$higher_lower} ",
+              "values for '{z$tolower(var_name)}', {z$high_low_disclaimer}."))))
+            }
+
+        return(out)
+      }
+
       # var_name <- sus_translate(variable_explanations %>% 
       #                               filter(var_code == var_right()) %>%
       #                               pull(var_name))

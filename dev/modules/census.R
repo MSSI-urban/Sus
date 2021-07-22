@@ -73,7 +73,7 @@ process_census_data <- function(data) {
   var_list <- c("housing_tenant_prop", "housing_rent_avg_dollar", 
                 "housing_value_avg_dollar", "housing_unafford_prop",
                 "housing_unsuit_prop", "housing_repairs_prop",
-                "housing_stressrenter_prop", "housing_stressowner_prop")
+                "housing_stress_renter_prop", "housing_stress_owner_prop")
   
   data <- 
     data %>% 
@@ -81,8 +81,8 @@ process_census_data <- function(data) {
            housing_unafford_prop = housing_unafford / housing_unafford_total,
            housing_unsuit_prop = housing_unsuit / housing_unsuit_total,
            housing_repairs_prop = major_repairs / repairs_total,
-           housing_stressrenter_prop = housing_stress_renter_prop / 100,
-           housing_stressowner_prop = housing_stress_owner_prop / 100) %>% 
+           housing_stress_renter_prop = housing_stress_renter_prop / 100,
+           housing_stress_owner_prop = housing_stress_owner_prop / 100) %>% 
     select(-c(renter, tenure_households, housing_unafford, 
               housing_unafford_total, housing_unsuit, housing_unsuit_total,
               rent_avg_total, value_avg_total, major_repairs, repairs_total)) %>% 
@@ -220,10 +220,10 @@ borough <-
       weighted.mean(housing_value_avg_dollar, value_avg_total, na.rm = TRUE),
     inc_median_dollar = weighted.mean(inc_median_dollar, inc_median_total, 
                                       na.rm = TRUE),
-    housing_stress_renter_prop = weighted.mean(housing_stress_renter_prop, rent_avg_total, 
-                                               na.rm = TRUE),
-    housing_stress_owner_prop = weighted.mean(housing_stress_owner_prop, value_avg_total, 
-                                              na.rm = TRUE),
+    housing_stress_renter_prop = 
+      weighted.mean(housing_stress_renter_prop, rent_avg_total, na.rm = TRUE),
+    housing_stress_owner_prop = 
+      weighted.mean(housing_stress_owner_prop, value_avg_total, na.rm = TRUE),
     inc_limat_prop = weighted.mean(inc_limat_prop, inc_limat_total, 
                                    na.rm = TRUE),
     across(c(tenure_households:repairs_total, 
@@ -333,13 +333,13 @@ var_exp <-
     explanation = paste0("the percentage of households living in ", 
                          "dwellings requiring major repairs")) %>% 
   add_row(
-    var_code = "housing_stressowner_prop",
+    var_code = "housing_stress_owner_prop",
     var_name = "Owner housing stress (%)",
     explanation = paste0("the percentage of owner households that ", 
                          "spend more than 30% of their income on ",
                          "shelter costs")) %>% 
   add_row(
-    var_code = "housing_stressrenter_prop",
+    var_code = "housing_stress_renter_prop",
     var_name = "Renter housing stress (%)",
     explanation = paste0("the percentage of renter households that ", 
                          "spend more than 30% of their income on ",

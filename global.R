@@ -32,6 +32,8 @@ options(shiny.trace = FALSE) # Set TRUE for debugging
 
 qload("data/census.qsm")
 grid <- qread("data/grid.qs")
+green_space <- qread("data/green_space.qs")
+crash <- qread("data/crash.qs")
 qload("data/colours.qsm")
 title_text <- qread("data/title_text.qs")
 var_exp <- qread("data/var_exp.qs")
