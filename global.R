@@ -35,9 +35,7 @@ grid <- qread("data/grid.qs")
 qload("data/colours.qsm")
 title_text <- qread("data/title_text.qs")
 var_exp <- qread("data/var_exp.qs")
-street <- qread("data/street.qs") %>%
-  st_cast("MULTILINESTRING") %>%
-  st_transform(4326)
+street <- qread("data/street.qs")
 
 
 # Translation -------------------------------------------------------------

@@ -36,7 +36,9 @@ data_server <- function(id, var_left, var_right, df, zoom = df) {
   stopifnot(is.reactive(zoom))
   
   moduleServer(id, function(input, output, session) {
+    
     reactive({
+      
       data <- get(sub("_2", "", df()))
       colour <- get(paste0("colour_", zoom()))
 
