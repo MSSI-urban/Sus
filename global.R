@@ -37,7 +37,6 @@ title_text <- qread("data/title_text.qs")
 var_exp <- qread("data/var_exp.qs")
 street <- qread("data/street.qs")
 
-
 # Translation -------------------------------------------------------------
 
 suppressWarnings({
