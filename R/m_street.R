@@ -87,7 +87,7 @@ street_server <- function(id) {
           filter(id == rv_street$path_selected)
         mapdeck_update(map_id = NS(id, "map")) %>%
           add_path(
-            data = data_to_add, stroke_width = 5 * (5 - rv_street$zoom),
+            data = data_to_add, stroke_width = 5 * (5 - data_to_add$significance),
             stroke_colour = "#000000",
             update_view = FALSE, layer_id = "path_highlight",
             auto_highlight = TRUE, highlight_colour = "#FFFFFF90")
