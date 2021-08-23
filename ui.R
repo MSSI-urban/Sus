@@ -132,6 +132,10 @@ ui <- dashboardPage(
           i18n$t("Safety analysis"),
           tabName = "crash_analysis"),
         
+        #Cycling Network
+        menuSubItem(
+          i18n$t("Cycling Network"),
+          tabName = "cycling"),
 
         startExpanded = TRUE),
       
@@ -224,6 +228,7 @@ ui <- dashboardPage(
       tabItem(tabName = "covid", covid_UI("covid")),
       tabItem(tabName = "crash", crash_UI("crash")),
       tabItem(tabName = "crash_analysis", crash_analysis_UI("crash_analysis")),
+      tabItem(tabName = "cycling", cycling_UI("cycling")),
       tabItem(tabName = "dmti", dmti_UI("dmti")),
       tabItem(tabName = "housing", housing_UI("housing")),
       tabItem(tabName = "mcp", mcp_UI("mcp")),

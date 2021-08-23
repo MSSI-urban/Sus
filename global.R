@@ -40,6 +40,7 @@ crash <- qread("data/crash.qs")
 qload("data/colours.qsm")
 title_text <- qread("data/title_text.qs")
 var_exp <- qread("data/var_exp.qs")
+qload("data/cycling_network_module.qsm")
 
 
 # Translation -------------------------------------------------------------
